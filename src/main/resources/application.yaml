@@ -22,14 +22,15 @@ spring:
                 preLogger: true
                 postLogger: true
           routes:
-            - id: first-service
-              uri: lb://FIRST-SERVICE
+            - id: user-service
+              uri: lb://USER-SERVICE
               predicates:
-                - Path=/first-service/**
-              filters:
-                - name: CustomFilter
-                - name: LoggingFilter
-                  args:
-                    baseMessage: Hi, there.
-                    preLogger: true
-                    postLogger: true
+                - Path=/user-service/**
+            - id: catalog-service
+              uri: lb://CATALOG-SERVICE
+              predicates:
+                - Path=/catalog-service/**
+            - id: order-service
+              uri: lb://ORDER-SERVICE
+              predicates:
+                - Path=/order-service/**
