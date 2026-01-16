@@ -9,6 +9,8 @@ eureka:
       defaultZone: http://localhost:8761/eureka
 
 spring:
+  config:
+    import: "optional:file:.env[.properties]"
   application:
     name: apigateway-service
   cloud:
@@ -22,15 +24,63 @@ spring:
                 preLogger: true
                 postLogger: true
           routes:
+            # 유저 포인트 증감/차감
+            - id: user-service-point
+              uri: lb://USER-SERVICE
+              predicates:
+                - Path=/user-service/users/*/point/**
+                - Method=POST
+              filters:
+                - RemoveRequestHeader=Cookie
+                - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+                - AuthorizationHeaderFilter
+            # 회원가입
+            - id: user-service-register
+              uri: lb://USER-SERVICE
+              predicates:
+                - Path=/user-service/users
+                - Method=POST
+              filters:
+                - RemoveRequestHeader=Cookie
+                - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+            # 로그인
+            - id: user-service-login
+              uri: lb://USER-SERVICE
+              predicates:
+                - Path=/user-service/login
+                - Method=POST
+              filters:
+                - RemoveRequestHeader=Cookie
+                - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+            # 유저 서비스
             - id: user-service
               uri: lb://USER-SERVICE
               predicates:
                 - Path=/user-service/**
+                - Method=GET
+              filters:
+                - RemoveRequestHeader=Cookie
+                - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+                - AuthorizationHeaderFilter
+            # 제품 서비스
             - id: catalog-service
               uri: lb://CATALOG-SERVICE
               predicates:
                 - Path=/catalog-service/**
+            # 주문 서비스
             - id: order-service
               uri: lb://ORDER-SERVICE
               predicates:
                 - Path=/order-service/**
+              filters:
+                - AuthorizationHeaderFilter
+            # 게임 키 서비스
+            - id: key-inventory-service
+              uri: lb://KEY-INVENTORY-SERVICE
+              predicates:
+                - Path=/key-inventory/**
+              filters:
+                - AuthorizationHeaderFilter
+
+token:
+  secret: ${TOKEN_SECRET}
