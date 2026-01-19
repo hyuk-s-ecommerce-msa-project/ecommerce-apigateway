@@ -88,6 +88,13 @@ spring:
                 - Path=/payment-service/**
               filters:
                 - AuthorizationHeaderFilter
+            # 장바구니 서비스
+            - id: order-service
+              uri: lb://ORDER-SERVICE
+              predicates:
+                - Path=/cart-service/**
+              filters:
+                - AuthorizationHeaderFilter
 
 token:
   secret: ${TOKEN_SECRET}
