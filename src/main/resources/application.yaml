@@ -95,6 +95,13 @@ spring:
                 - Path=/cart-service/**
               filters:
                 - AuthorizationHeaderFilter
+            # 찜하기 서비스
+            - id: user-service
+              uri: lb://USER-SERVICE
+              predicates:
+                - Path=/wish-service/**
+              filters:
+                - AuthorizationHeaderFilter
 
 token:
   secret: ${TOKEN_SECRET}
