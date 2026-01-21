@@ -24,11 +24,21 @@ spring:
                 preLogger: true
                 postLogger: true
           routes:
+            # 유저 서비스
+            - id: user-service
+              uri: lb://USER-SERVICE
+              predicates:
+                - Path=/user-service/info
+                - Method=GET
+              filters:
+                - RemoveRequestHeader=Cookie
+                - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+                - AuthorizationHeaderFilter
             # 유저 포인트 증감/차감
             - id: user-service-point
               uri: lb://USER-SERVICE
               predicates:
-                - Path=/user-service/users/*/point/**
+                - Path=/user-service/point/**
                 - Method=POST
               filters:
                 - RemoveRequestHeader=Cookie
@@ -52,16 +62,6 @@ spring:
               filters:
                 - RemoveRequestHeader=Cookie
                 - RewritePath=/user-service/(?<segment>.*), /$\{segment}
-            # 유저 서비스
-            - id: user-service
-              uri: lb://USER-SERVICE
-              predicates:
-                - Path=/user-service/**
-                - Method=GET
-              filters:
-                - RemoveRequestHeader=Cookie
-                - RewritePath=/user-service/(?<segment>.*), /$\{segment}
-                - AuthorizationHeaderFilter
             # 제품 서비스
             - id: catalog-service
               uri: lb://CATALOG-SERVICE
@@ -82,6 +82,11 @@ spring:
               filters:
                 - AuthorizationHeaderFilter
             # 결제 서비스
+            - id: pay-service-process
+              uri: lb://PAY-SERVICE
+              predicates:
+                - Path=/payment-service/payment/success, /payment-service/payment/cancel, /payment-service/payment/fail
+            # 결제 서비스
             - id: pay-service
               uri: lb://PAY-SERVICE
               predicates:
@@ -89,19 +94,28 @@ spring:
               filters:
                 - AuthorizationHeaderFilter
             # 장바구니 서비스
-            - id: order-service
+            - id: order-service-cart
               uri: lb://ORDER-SERVICE
               predicates:
                 - Path=/cart-service/**
               filters:
                 - AuthorizationHeaderFilter
             # 찜하기 서비스
-            - id: user-service
+            - id: user-service-wish
               uri: lb://USER-SERVICE
               predicates:
                 - Path=/wish-service/**
               filters:
                 - AuthorizationHeaderFilter
+            # 토큰 재발급
+            - id: user-service-refresh
+              uri: lb://USER-SERVICE
+              predicates:
+                - Path=/user-service/auth/refresh
+                - Method=POST
+              filters:
+                - RemoveRequestHeader=Cookie
+                - RewritePath=/user-service/(?<segment>.*), /$\{segment}
 
 token:
   secret: ${TOKEN_SECRET}

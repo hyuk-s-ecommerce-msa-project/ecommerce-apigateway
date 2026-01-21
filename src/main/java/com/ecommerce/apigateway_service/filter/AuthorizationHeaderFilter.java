@@ -45,11 +45,15 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
             String authorizationHeader = request.getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
             String jwt = authorizationHeader.replace("Bearer ", "");
 
-            if (!isJwtValid(jwt)) {
-                return onError(exchange, "JWT token is not valid", HttpStatus.UNAUTHORIZED);
+            String userId = getSubjectIfValid(jwt);
+
+            if (userId == null) {
+                return onError(exchange, "Invalid JWT token", HttpStatus.UNAUTHORIZED);
             }
 
-            return chain.filter(exchange);
+            ServerHttpRequest newRequest = request.mutate().header("userId", userId).build();
+
+            return chain.filter(exchange.mutate().request(newRequest).build());
         };
     }
 
@@ -64,24 +68,16 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
         return response.writeWith(Flux.just(buffer));
     }
 
-    private boolean isJwtValid(String jwt) {
-        byte[] secretKeyBytes = env.getProperty("token.secret").getBytes();
+    private String getSubjectIfValid(String jwt) {
+        byte[] secretKeyBytes = env.getProperty("token.secret").getBytes(StandardCharsets.UTF_8);
         SecretKey signingKey = Keys.hmacShaKeyFor(secretKeyBytes);
-
-        boolean returnValue = true;
-        String subject = null;
 
         try {
             JwtParser parser = Jwts.parser().verifyWith(signingKey).build();
-            subject = parser.parseSignedClaims(jwt).getPayload().getSubject();
+            return parser.parseSignedClaims(jwt).getPayload().getSubject();
         } catch (Exception e) {
             log.error("Jwt Error : {}", e.getMessage());
-            returnValue = false;
+            return null;
         }
-
-        if (subject == null || subject.isEmpty()) {
-            returnValue = false;
-        }
-        return returnValue;
     }
 }
