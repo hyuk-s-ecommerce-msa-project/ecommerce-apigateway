@@ -9,11 +9,17 @@ eureka:
       defaultZone: http://localhost:8761/eureka
 
 spring:
-  config:
-    import: "optional:file:.env[.properties]"
   application:
     name: apigateway-service
+  config:
+    import:
+      - "optional:configserver:http://localhost:8888"
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
   cloud:
+    config:
+      name: gameinfo
     gateway:
       server:
         webflux:
@@ -24,11 +30,18 @@ spring:
                 preLogger: true
                 postLogger: true
           routes:
+            # 유저 서비스 Actuator
+            - id: user-service-actuator
+              uri: lb://USER-SERVICE
+              predicates:
+                - Path=/user-service/actuator/**
+              filters:
+                - RewritePath=/user-service/(?<segment>.*), /$\{segment}
             # 유저 서비스
             - id: user-service
               uri: lb://USER-SERVICE
               predicates:
-                - Path=/user-service/info
+                - Path=/user-service/info/**
                 - Method=GET
               filters:
                 - RemoveRequestHeader=Cookie
@@ -117,9 +130,6 @@ spring:
                 - RemoveRequestHeader=Cookie
                 - RewritePath=/user-service/(?<segment>.*), /$\{segment}
 
-token:
-  secret: ${TOKEN_SECRET}
-
 management:
   endpoints:
     web:
@@ -128,3 +138,5 @@ management:
           - health
           - beans
           - info
+          - httpexchanges
+          - busrefresh
