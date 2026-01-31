@@ -87,6 +87,12 @@ spring:
                 - Path=/order-service/**
               filters:
                 - AuthorizationHeaderFilter
+            # 게임 키 서비스 (인증 제외)
+            - id: key-inventory-keys-public
+              uri: lb://KEY-INVENTORY-SERVICE
+              predicates:
+                - Path=/key-inventory/keys
+                - Method=GET
             # 게임 키 서비스
             - id: key-inventory-service
               uri: lb://KEY-INVENTORY-SERVICE
