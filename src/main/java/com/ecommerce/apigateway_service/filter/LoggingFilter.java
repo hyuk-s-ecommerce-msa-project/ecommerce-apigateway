@@ -24,15 +24,19 @@ public class LoggingFilter extends AbstractGatewayFilterFactory<LoggingFilter.Co
             ServerHttpRequest request = exchange.getRequest();
             ServerHttpResponse response = exchange.getResponse();
 
+            long startTime = System.currentTimeMillis();
+            String traceId = request.getId();
+
             log.info("Logging Filter baseMessage: {}}", config.getBaseMessage());
 
             if (config.isPreLogger()) {
-                log.info("Logging Pre Filter: request uri -> {}", request.getURI());
+                log.info("[{}] Start: {} {}", traceId, request.getMethod(), request.getURI());
             }
 
             return chain.filter(exchange).then(Mono.fromRunnable(() -> {
                 if (config.isPostLogger()) {
-                    log.info("Logging Post Filter: response code -> {}", response.getStatusCode());
+                    long duration = System.currentTimeMillis() - startTime;
+                    log.info("[{}] End: Code {} | Time: {}ms", traceId, response.getStatusCode(), duration);
                 }
             }));
         }, OrderedGatewayFilter.HIGHEST_PRECEDENCE);
