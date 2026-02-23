@@ -13,7 +13,7 @@ spring:
     name: apigateway-service
   config:
     import:
-      - "optional:configserver:http://localhost:8888"
+      - "optional:configserver:http://localhost:9088"
   rabbitmq:
     host: 127.0.0.1
     port: 5672
@@ -75,11 +75,25 @@ spring:
               filters:
                 - RemoveRequestHeader=Cookie
                 - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+            # 제품 서비스 Actuator
+            - id: catalog-service-actuator
+              uri: lb://CATALOG-SERVICE
+              predicates:
+                - Path=/catalog-service/actuator/**
+              filters:
+                - RewritePath=/catalog-service/(?<segment>.*), /$\{segment}
             # 제품 서비스
             - id: catalog-service
               uri: lb://CATALOG-SERVICE
               predicates:
                 - Path=/catalog-service/**
+            # 주문 서비스 Actuator
+            - id: order-service-actuator
+              uri: lb://ORDER-SERVICE
+              predicates:
+                - Path=/order-service/actuator/**
+              filters:
+                - RewritePath=/order-service/(?<segment>.*), /$\{segment}
             # 주문 서비스
             - id: order-service
               uri: lb://ORDER-SERVICE
@@ -87,6 +101,13 @@ spring:
                 - Path=/order-service/**
               filters:
                 - AuthorizationHeaderFilter
+            # 게임 키 서비스 Actuator
+            - id: key-inventory-service-actuator
+              uri: lb://KEY-INVENTORY-SERVICE
+              predicates:
+                - Path=/key-inventory/actuator/**
+              filters:
+                - RewritePath=/key-inventory/(?<segment>.*), /$\{segment}
             # 게임 키 서비스 (인증 제외)
             - id: key-inventory-keys-public
               uri: lb://KEY-INVENTORY-SERVICE
@@ -100,6 +121,13 @@ spring:
                 - Path=/key-inventory/**
               filters:
                 - AuthorizationHeaderFilter
+            # 결제 서비스 Actuator
+            - id: pay-service-actuator
+              uri: lb://PAY-SERVICE
+              predicates:
+                - Path=/payment-service/actuator/**
+              filters:
+                - RewritePath=/payment-service/(?<segment>.*), /$\{segment}
             # 결제 서비스
             - id: pay-service-process
               uri: lb://PAY-SERVICE
@@ -112,6 +140,13 @@ spring:
                 - Path=/payment-service/**
               filters:
                 - AuthorizationHeaderFilter
+            # 장바구니 서비스 Actuator
+            - id: order-service-cart-actuator
+              uri: lb://ORDER-SERVICE
+              predicates:
+                - Path=/cart-service/actuator/**
+              filters:
+                - RewritePath=/cart-service/(?<segment>.*), /$\{segment}
             # 장바구니 서비스
             - id: order-service-cart
               uri: lb://ORDER-SERVICE
@@ -119,6 +154,13 @@ spring:
                 - Path=/cart-service/**
               filters:
                 - AuthorizationHeaderFilter
+            # 찜하기 서비스 Actuator
+            - id: user-service-wish-actuator
+              uri: lb://USER-SERVICE
+              predicates:
+                - Path=/wish-service/actuator/**
+              filters:
+                - RewritePath=/wish-service/(?<segment>.*), /$\{segment}
             # 찜하기 서비스
             - id: user-service-wish
               uri: lb://USER-SERVICE
@@ -137,6 +179,13 @@ spring:
                 - RewritePath=/user-service/(?<segment>.*), /$\{segment}
 
 management:
+  tracing:
+    sampling:
+      probability: 1.0
+    enabled: true
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
   endpoints:
     web:
       exposure:
@@ -146,3 +195,5 @@ management:
           - info
           - httpexchanges
           - busrefresh
+          - prometheus
+          - metrics
