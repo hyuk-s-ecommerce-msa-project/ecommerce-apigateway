@@ -53,6 +53,11 @@ dependencies {
 	implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
 	implementation 'io.github.openfeign:feign-micrometer'
 	implementation 'io.micrometer:micrometer-registry-prometheus'
+
+	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-reactor-resilience4j'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+	implementation 'io.github.resilience4j:resilience4j-bulkhead'
+	implementation 'io.github.resilience4j:resilience4j-reactor'
 }
 
 dependencyManagement {

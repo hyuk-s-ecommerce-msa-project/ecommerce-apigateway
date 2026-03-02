@@ -23,12 +23,12 @@ spring:
     gateway:
       server:
         webflux:
-          default-filters:
-            - name: GlobalFilter
-              args:
-                baseMessage: Spring Cloud Gateway WebFlux Global Filter
-                preLogger: true
-                postLogger: true
+#          default-filters:
+#            - name: GlobalFilter
+#              args:
+#                baseMessage: Spring Cloud Gateway WebFlux Global Filter
+#                preLogger: true
+#                postLogger: true
           routes:
             # 유저 서비스 Actuator
             - id: user-service-actuator
@@ -47,6 +47,10 @@ spring:
                 - RemoveRequestHeader=Cookie
                 - RewritePath=/user-service/(?<segment>.*), /$\{segment}
                 - AuthorizationHeaderFilter
+                - name: CircuitBreaker
+                  args:
+                    name: userLoginCircuitBreaker
+                    fallbackUri: forward:/fallback/login-service
             # 유저 포인트 증감/차감
             - id: user-service-point
               uri: lb://USER-SERVICE
@@ -75,6 +79,15 @@ spring:
               filters:
                 - RemoveRequestHeader=Cookie
                 - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+                - name: RequestRateLimiter
+                  args:
+                    redis-rate-limiter.replenishRate: 500
+                    redis-rate-limiter.burstCapacity: 1000
+                - name: CircuitBreaker
+                  args:
+                    name: userLoginCircuitBreaker
+                    fallbackUri: forward:/fallback/login-service
+
             # 제품 서비스 Actuator
             - id: catalog-service-actuator
               uri: lb://CATALOG-SERVICE
@@ -197,3 +210,23 @@ management:
           - busrefresh
           - prometheus
           - metrics
+
+resilience4j:
+  bulkhead:
+    configs:
+      default:
+        maxConcurrentCalls: 1000
+        maxWaitDuration: 2s
+    instances:
+      userLoginCircuitBreaker:
+        baseConfig: default
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 100
+        failureRateThreshold: 60
+        waitDurationInOpenState: 10s
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 5s
