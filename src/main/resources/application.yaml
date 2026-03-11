@@ -81,8 +81,8 @@ spring:
                 - RewritePath=/user-service/(?<segment>.*), /$\{segment}
                 - name: RequestRateLimiter
                   args:
-                    redis-rate-limiter.replenishRate: 500
-                    redis-rate-limiter.burstCapacity: 1000
+                    redis-rate-limiter.replenishRate: 20000
+                    redis-rate-limiter.burstCapacity: 40000
                 - name: CircuitBreaker
                   args:
                     name: userLoginCircuitBreaker
