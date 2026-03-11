@@ -13,9 +13,9 @@ spring:
     name: apigateway-service
   config:
     import:
-      - "optional:configserver:http://localhost:9088"
+      - "optional:configserver:http://config-server:9088"
   rabbitmq:
-    host: 127.0.0.1
+    host: rabbitmq-devops
     port: 5672
   cloud:
     config:
@@ -198,7 +198,7 @@ management:
     enabled: true
   zipkin:
     tracing:
-      endpoint: http://localhost:9411/api/v2/spans
+      endpoint: http://zipkin:9411/api/v2/spans
   endpoints:
     web:
       exposure:
