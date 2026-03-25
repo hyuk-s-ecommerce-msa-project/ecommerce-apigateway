@@ -1,13 +1,6 @@
 server:
   port: 8000
 
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://localhost:8761/eureka
-
 spring:
   application:
     name: apigateway-service
@@ -32,14 +25,14 @@ spring:
           routes:
             # 유저 서비스 Actuator
             - id: user-service-actuator
-              uri: lb://USER-SERVICE
+              uri: http://user-service:8081
               predicates:
                 - Path=/user-service/actuator/**
               filters:
                 - RewritePath=/user-service/(?<segment>.*), /$\{segment}
             # 유저 서비스
             - id: user-service
-              uri: lb://USER-SERVICE
+              uri: http://user-service:8081
               predicates:
                 - Path=/user-service/info/**
                 - Method=GET
@@ -53,7 +46,7 @@ spring:
                     fallbackUri: forward:/fallback/login-service
             # 유저 포인트 증감/차감
             - id: user-service-point
-              uri: lb://USER-SERVICE
+              uri: http://user-service:8081
               predicates:
                 - Path=/user-service/point/**
                 - Method=POST
@@ -63,7 +56,7 @@ spring:
                 - AuthorizationHeaderFilter
             # 회원가입
             - id: user-service-register
-              uri: lb://USER-SERVICE
+              uri: http://user-service:8081
               predicates:
                 - Path=/user-service/users
                 - Method=POST
@@ -72,7 +65,7 @@ spring:
                 - RewritePath=/user-service/(?<segment>.*), /$\{segment}
             # 로그인
             - id: user-service-login
-              uri: lb://USER-SERVICE
+              uri: http://user-service:8081
               predicates:
                 - Path=/user-service/login
                 - Method=POST
@@ -90,100 +83,100 @@ spring:
 
             # 제품 서비스 Actuator
             - id: catalog-service-actuator
-              uri: lb://CATALOG-SERVICE
+              uri: http://catalog-service:8082
               predicates:
                 - Path=/catalog-service/actuator/**
               filters:
                 - RewritePath=/catalog-service/(?<segment>.*), /$\{segment}
             # 제품 서비스
             - id: catalog-service
-              uri: lb://CATALOG-SERVICE
+              uri: http://catalog-service:8082
               predicates:
                 - Path=/catalog-service/**
             # 주문 서비스 Actuator
             - id: order-service-actuator
-              uri: lb://ORDER-SERVICE
+              uri: http://order-service:8083
               predicates:
                 - Path=/order-service/actuator/**
               filters:
                 - RewritePath=/order-service/(?<segment>.*), /$\{segment}
             # 주문 서비스
             - id: order-service
-              uri: lb://ORDER-SERVICE
+              uri: http://order-service:8083
               predicates:
                 - Path=/order-service/**
               filters:
                 - AuthorizationHeaderFilter
             # 게임 키 서비스 Actuator
             - id: key-inventory-service-actuator
-              uri: lb://KEY-INVENTORY-SERVICE
+              uri: http://key-inventory-service:8085
               predicates:
                 - Path=/key-inventory/actuator/**
               filters:
                 - RewritePath=/key-inventory/(?<segment>.*), /$\{segment}
             # 게임 키 서비스 (인증 제외)
             - id: key-inventory-keys-public
-              uri: lb://KEY-INVENTORY-SERVICE
+              uri: http://key-inventory-service:8085
               predicates:
                 - Path=/key-inventory/keys
                 - Method=GET
             # 게임 키 서비스
             - id: key-inventory-service
-              uri: lb://KEY-INVENTORY-SERVICE
+              uri: http://key-inventory-service:8085
               predicates:
                 - Path=/key-inventory/**
               filters:
                 - AuthorizationHeaderFilter
             # 결제 서비스 Actuator
             - id: pay-service-actuator
-              uri: lb://PAY-SERVICE
+              uri: http://payment-service:8084
               predicates:
                 - Path=/payment-service/actuator/**
               filters:
                 - RewritePath=/payment-service/(?<segment>.*), /$\{segment}
             # 결제 서비스
             - id: pay-service-process
-              uri: lb://PAY-SERVICE
+              uri: http://payment-service:8084
               predicates:
                 - Path=/payment-service/payment/success, /payment-service/payment/cancel, /payment-service/payment/fail
             # 결제 서비스
             - id: pay-service
-              uri: lb://PAY-SERVICE
+              uri: http://payment-service:8084
               predicates:
                 - Path=/payment-service/**
               filters:
                 - AuthorizationHeaderFilter
             # 장바구니 서비스 Actuator
             - id: order-service-cart-actuator
-              uri: lb://ORDER-SERVICE
+              uri: http://order-service:8083
               predicates:
                 - Path=/cart-service/actuator/**
               filters:
                 - RewritePath=/cart-service/(?<segment>.*), /$\{segment}
             # 장바구니 서비스
             - id: order-service-cart
-              uri: lb://ORDER-SERVICE
+              uri: http://order-service:8083
               predicates:
                 - Path=/cart-service/**
               filters:
                 - AuthorizationHeaderFilter
             # 찜하기 서비스 Actuator
             - id: user-service-wish-actuator
-              uri: lb://USER-SERVICE
+              uri: http://user-service:8081
               predicates:
                 - Path=/wish-service/actuator/**
               filters:
                 - RewritePath=/wish-service/(?<segment>.*), /$\{segment}
             # 찜하기 서비스
             - id: user-service-wish
-              uri: lb://USER-SERVICE
+              uri: http://user-service:8081
               predicates:
                 - Path=/wish-service/**
               filters:
                 - AuthorizationHeaderFilter
             # 토큰 재발급
             - id: user-service-refresh
-              uri: lb://USER-SERVICE
+              uri: http://user-service:8081
               predicates:
                 - Path=/user-service/auth/refresh
                 - Method=POST
