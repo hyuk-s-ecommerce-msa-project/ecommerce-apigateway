@@ -58,6 +58,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
 	implementation 'io.github.resilience4j:resilience4j-bulkhead'
 	implementation 'io.github.resilience4j:resilience4j-reactor'
+
+	testImplementation 'io.projectreactor:reactor-test'
 }
 
 dependencyManagement {
