@@ -12,6 +12,4 @@ spring:
 
   cloud:
     config:
-      name:
-        - gameinfo
-        - gateway
+      name: gameinfo,gateway
